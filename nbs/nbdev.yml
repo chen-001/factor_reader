@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "factor_reader"
+  site-url: "https://chen-001.github.io/factor_reader"
+  description: "a tool to read stock factor data for quants"
+  repo-branch: main
+  repo-url: "https://github.com/chen-001/factor_reader"
