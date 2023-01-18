@@ -5,4 +5,6 @@ d = { 'settings': { 'branch': 'main',
                 'doc_host': 'https://chen-001.github.io',
                 'git_url': 'https://github.com/chen-001/factor_reader',
                 'lib_path': 'factor_reader'},
-  'syms': {'factor_reader.core': {'factor_reader.core.foo': ('core.html#foo', 'factor_reader/core.py')}}}
+  'syms': { 'factor_reader.core': { 'factor_reader.core.__initialize_factor': ('core.html#__initialize_factor', 'factor_reader/core.py'),
+                                    'factor_reader.core.read_factor': ('core.html#read_factor', 'factor_reader/core.py'),
+                                    'factor_reader.core.update_factor': ('core.html#update_factor', 'factor_reader/core.py')}}}
