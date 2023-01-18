@@ -16,7 +16,9 @@ pip install factor_reader
 
 Fill me in please! Don’t forget code examples:
 
+``` python
 import factor_reader
 
-token=‘xxxxxxxxxx’
-factor_reader.read_factor(‘factor1’,token=token,start_date=20130101,end_date=20221231)
+token='xxxxxxxxxx'
+factor_reader.read_factor('factor1',token=token,start_date=20130101,end_date=20221231)
+```
