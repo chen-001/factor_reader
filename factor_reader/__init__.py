@@ -78,11 +78,11 @@ def __update_factor(fac_key: str, fac_df: pd.DataFrame, token: str):
 
 # %% ../nbs/factor_reader_core.ipynb 6
 def show_all_factors_information(token: str) -> pd.DataFrame:
-    """展示目前数据库内包含的所有因子数据的相关信息，包括：
-    1. 数据键名：提取数据时需要使用的数据键名，即`read_factor`函数中的第一个参数`fac_key`，如：factor1
-    2. 因子名称：研报中因子的名称，如：适度冒险因子
-    3. 报告题目：发布该因子的研究报告的题目，如：成交量激增时刻蕴含的alpha信息——多因子选股系列研究之一
-    4. 微信链接：该报告在微信公众号上的的宣传推文的链接
+    """展示目前数据库内包含的所有因子数据的相关信息，包括：    
+    1. 数据键名：提取数据时需要使用的数据键名，即`read_factor`函数中的第一个参数`fac_key`，如：factor1    
+    2. 因子名称：研报中因子的名称，如：适度冒险因子    
+    3. 报告题目：发布该因子的研究报告的题目，如：成交量激增时刻蕴含的alpha信息——多因子选股系列研究之一    
+    4. 微信链接：该报告在微信公众号上的的宣传推文的链接    
 
     Parameters
     ----------
