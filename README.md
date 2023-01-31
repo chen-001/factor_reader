@@ -7,11 +7,20 @@ factor_reader
 
 - [说明文档](https://chen-001.github.io/factor_reader/)
 - [pypi](https://pypi.org/project/factor-reader/)
+- [Github](https://github.com/chen-001/factor_reader)
 
-## 安装
+## 安装与升级
+
+- 首次安装
 
 ``` sh
 pip install factor_reader
+```
+
+- 升级
+
+``` sh
+pip install factor_reader --upgrade
 ```
 
 ## 使用
