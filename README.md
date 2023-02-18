@@ -29,30 +29,27 @@ factor_reader目前共包含两个功能：
 1. 查看目前包含哪些因子，以及每个因子的基本信息  
 2. 读取某一因子在某段时间上的因子数据
 
-第一步：查看目前数据库中有哪些因子
-
 ``` python
 import factor_reader
 
-# 需要token请与作者联系
-token='xxxxxxxxxx'  
-info=factor_reader.show_all_factors_information(token)
-```
+# 第一步：实例化一个FactorReader对象，输入token
+token='xxxxxxxxxx'
+fr=factor_reader.FactorReader(token)  
 
-第二步：读取某个因子在某个时间段的数据
+# 第二步：查看当前因子数据库中有哪些因子（此步骤可选）
+fr.show_all_factors_information() # 展示所有可读取因子的相关信息
 
-``` python
-import factor_reader
+# 第三步：读取因子数据
+## ①读取单日单个因子的数据
+fr.read_factor('球队硬币',trade_date=20230113) # 读取球队硬币因子在2023年1月13日的因子数据
+fr.read_factor('factor4',trade_date=20230113) # 读取方正金工多因子系列第4篇的因子在2023年1月13日的因子数据
 
-# 需要token请与作者联系
-token='xxxxxxxxxx' 
+## ②读取多个交易日单个因子的数据
+fr.read_factor('球队硬币',start_date=20230101,end_date=20230113) # 读取球队硬币因子从2023年1月1日至2023年1月13日的因子数据
+fr.read_factor('factor4',start_date=20230101,end_date=20230113,sql_like=True) # 以sql的形式，读取方正金工多因子系列第4篇的因子从2023年1月1日至2023年1月13日的因子数据
 
-# 读取键名为factor1的因子在2013年1月1日至2022年12月31日间的因子数据
-data1=factor_reader.read_factor('factor1',token=token,start_date=20130101,end_date=20221231) 
-
-# 读取键名为factor4的因子在2023年1月13日的因子数据
-data2=factor_reader.read_factor('factor4',token=token,trade_date=20230113) 
-
-# 读取键名为factor5的因子全部的因子数据
-data3=factor_reader.read_factor('factor5',token=token) 
+## ③读取多个交易日多个因子的因子数据
+fr.read_factor(['球队硬币','云开雾散'],start_date=20230101,end_date=20230113) # 分别读取球队硬币因子和云开雾散因子从2023年1月1日至2023年1月13日的因子数据
+fr.read_factor(['球队硬币','云开雾散','飞蛾扑火'],start_date=20230101,end_date=20230113,sql_like=True) # 以sql的形式，分别读取球队硬币因子、云开雾散因子、飞蛾扑火因子从2023年1月1日至2023年1月13日的因子数据
+fr.read_factor(['球队硬币','云开雾散','飞蛾扑火'],trade_date=20230113,sql_like=True) # 以sql的形式，分别读取球队硬币因子、云开雾散因子、飞蛾扑火因子2023年1月13日的因子数据
 ```

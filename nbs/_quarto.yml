@@ -11,10 +11,11 @@ website:
   twitter-card: true
   open-graph: true
   repo-actions: [issue]
+  repo-url: "https://github.com/chen-001/factor_reader"
   navbar:
     background: primary
     search: true
   sidebar:
-    style: floating
+    style: "docked"
 
 metadata-files: [nbdev.yml, sidebar.yml]
