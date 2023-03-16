@@ -1,0 +1,2690 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.335">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="读取因子数据的核心模块">
+
+<title>factor_reader - 核心功能与使用示例</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="styles.css">
+<meta property="og:title" content="factor_reader - 核心功能与使用示例">
+<meta property="og:description" content="读取因子数据的核心模块">
+<meta property="og:site-name" content="factor_reader">
+<meta name="twitter:title" content="factor_reader - 核心功能与使用示例">
+<meta name="twitter:description" content="读取因子数据的核心模块">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar docked nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">factor_reader</span>
+    </a>
+  </div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title">核心功能与使用示例</h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation docked overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">factor_reader</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./factor_reader_core.html" class="sidebar-item-text sidebar-link active">核心功能与使用示例</a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#concat_nosqls" id="toc-concat_nosqls" class="nav-link active" data-scroll-target="#concat_nosqls">concat_nosqls</a></li>
+  <li><a href="#do_on_dfs_class" id="toc-do_on_dfs_class" class="nav-link" data-scroll-target="#do_on_dfs_class">do_on_dfs_class</a></li>
+  <li><a href="#tokenunavailableerror" id="toc-tokenunavailableerror" class="nav-link" data-scroll-target="#tokenunavailableerror">TokenUnavailableError</a></li>
+  <li><a href="#factorreader" id="toc-factorreader" class="nav-link" data-scroll-target="#factorreader">FactorReader</a></li>
+  <li><a href="#factorreader.show_all_factors_information" id="toc-factorreader.show_all_factors_information" class="nav-link" data-scroll-target="#factorreader.show_all_factors_information">FactorReader.show_all_factors_information</a></li>
+  <li><a href="#factorreader.read_factor" id="toc-factorreader.read_factor" class="nav-link" data-scroll-target="#factorreader.read_factor">FactorReader.read_factor</a></li>
+  <li><a href="#使用示例" id="toc-使用示例" class="nav-link" data-scroll-target="#使用示例">使用示例</a>
+  <ul class="collapse">
+  <li><a href="#第一步实例化一个factorreader对象输入token" id="toc-第一步实例化一个factorreader对象输入token" class="nav-link" data-scroll-target="#第一步实例化一个factorreader对象输入token">第一步：实例化一个FactorReader对象，输入token</a></li>
+  <li><a href="#第二步查看当前因子数据库中有哪些因子此步骤可选" id="toc-第二步查看当前因子数据库中有哪些因子此步骤可选" class="nav-link" data-scroll-target="#第二步查看当前因子数据库中有哪些因子此步骤可选">第二步：查看当前因子数据库中有哪些因子（此步骤可选）</a></li>
+  <li><a href="#第三步读取因子数据" id="toc-第三步读取因子数据" class="nav-link" data-scroll-target="#第三步读取因子数据">第三步：读取因子数据</a>
+  <ul class="collapse">
+  <li><a href="#读取单日单个因子的数据" id="toc-读取单日单个因子的数据" class="nav-link" data-scroll-target="#读取单日单个因子的数据">①读取单日单个因子的数据</a></li>
+  <li><a href="#读取多个交易日单个因子的数据" id="toc-读取多个交易日单个因子的数据" class="nav-link" data-scroll-target="#读取多个交易日单个因子的数据">②读取多个交易日单个因子的数据</a></li>
+  <li><a href="#读取多个交易日多个因子的因子数据" id="toc-读取多个交易日多个因子的因子数据" class="nav-link" data-scroll-target="#读取多个交易日多个因子的因子数据">③读取多个交易日多个因子的因子数据</a></li>
+  </ul></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/chen-001/factor_reader/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block">核心功能与使用示例</h1>
+</div>
+
+<div>
+  <div class="description">
+    读取因子数据的核心模块
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<hr>
+<section id="concat_nosqls" class="level3">
+<h3 class="anchored" data-anchor-id="concat_nosqls">concat_nosqls</h3>
+<blockquote class="blockquote">
+<pre><code> concat_nosqls (func)</code></pre>
+</blockquote>
+<hr>
+</section>
+<section id="do_on_dfs_class" class="level3">
+<h3 class="anchored" data-anchor-id="do_on_dfs_class">do_on_dfs_class</h3>
+<blockquote class="blockquote">
+<pre><code> do_on_dfs_class (func)</code></pre>
+</blockquote>
+<p>一个装饰器，使类的方法的参数可以输入为列表或元组，返回值为分别对各个参数执行此函数后依次得到的结果</p>
+<hr>
+</section>
+<section id="tokenunavailableerror" class="level3">
+<h3 class="anchored" data-anchor-id="tokenunavailableerror">TokenUnavailableError</h3>
+<blockquote class="blockquote">
+<pre><code> TokenUnavailableError (error_info)</code></pre>
+</blockquote>
+<p>Not enough permissions.</p>
+<hr>
+</section>
+<section id="factorreader" class="level3">
+<h3 class="anchored" data-anchor-id="factorreader">FactorReader</h3>
+<blockquote class="blockquote">
+<pre><code> FactorReader (token:str)</code></pre>
+</blockquote>
+<p>Initialize self. See help(type(self)) for accurate signature.</p>
+<hr>
+</section>
+<section id="factorreader.show_all_factors_information" class="level3">
+<h3 class="anchored" data-anchor-id="factorreader.show_all_factors_information">FactorReader.show_all_factors_information</h3>
+<blockquote class="blockquote">
+<pre><code> FactorReader.show_all_factors_information ()</code></pre>
+</blockquote>
+<hr>
+</section>
+<section id="factorreader.read_factor" class="level3">
+<h3 class="anchored" data-anchor-id="factorreader.read_factor">FactorReader.read_factor</h3>
+<blockquote class="blockquote">
+<pre><code> FactorReader.read_factor (fac_key:str,
+                           trade_date:Union[int,str,datetime.datetime]=Non
+                           e, start_date:Union[int,str,datetime.datetime]=
+                           None,
+                           end_date:Union[int,str,datetime.datetime]=None,
+                           sql_like:bool=False)</code></pre>
+</blockquote>
+<p>通过表名，读取因子数据</p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>fac_key</td>
+<td>str</td>
+<td></td>
+<td>表的名称或因子的名称</td>
+</tr>
+<tr class="even">
+<td>trade_date</td>
+<td>typing.Union[int, str, datetime.datetime]</td>
+<td>None</td>
+<td>读取单日因子值，形如20230106或’20230106’或’2023-01-13’或pd.Timestamp(‘2023-01-13’)，指定此参数时，start_date和end_date两个参数将失效, by default None</td>
+</tr>
+<tr class="odd">
+<td>start_date</td>
+<td>typing.Union[int, str, datetime.datetime]</td>
+<td>None</td>
+<td>读取因子值的起始日期，形如20230106或’20230106’或’2023-01-13’或pd.Timestamp(‘2023-01-13’), by default None</td>
+</tr>
+<tr class="even">
+<td>end_date</td>
+<td>typing.Union[int, str, datetime.datetime]</td>
+<td>None</td>
+<td>读取因子值的终止日期，形如20230106或’20230106’或’2023-01-13’或pd.Timestamp(‘2023-01-13’), by default None</td>
+</tr>
+<tr class="odd">
+<td>sql_like</td>
+<td>bool</td>
+<td>False</td>
+<td>返回的数据为形如sql中的长表，包括日期、股票代码、因子值三列, by default False</td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>DataFrame</strong></td>
+<td></td>
+<td><strong>因子值，index为每天的日期，columns为股票代码，values为因子值</strong></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="使用示例" class="level1">
+<h1>使用示例</h1>
+<section id="第一步实例化一个factorreader对象输入token" class="level2">
+<h2 class="anchored" data-anchor-id="第一步实例化一个factorreader对象输入token">第一步：实例化一个FactorReader对象，输入token</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>fr<span class="op">=</span>FactorReader(token<span class="op">=</span>token) <span class="co"># 初始化一个FactorReader对象，输入token，连接因子数据库</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="第二步查看当前因子数据库中有哪些因子此步骤可选" class="level2">
+<h2 class="anchored" data-anchor-id="第二步查看当前因子数据库中有哪些因子此步骤可选">第二步：查看当前因子数据库中有哪些因子（此步骤可选）</h2>
+<div class="cell" data-execution_count="34">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>fr.show_all_factors_information() <span class="co"># 展示所有可读取因子的相关信息</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="34">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>数据键名</th>
+      <th>因子名称</th>
+      <th>报告题目</th>
+      <th>微信链接</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>factor1</td>
+      <td>适度冒险因子</td>
+      <td>成交量激增时刻蕴含的alpha信息——多因子选股系列研究之一</td>
+      <td>https://mp.weixin.qq.com/s/2pObrtp3V0dv50MFGg_fhw</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>factor2</td>
+      <td>完整潮汐因子</td>
+      <td>个股成交量的潮汐变化及“潮汐”因子构建——多因子选股系列研究之二</td>
+      <td>https://mp.weixin.qq.com/s/_2xWXM8iyNzYDYolT9vVsw</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>factor3</td>
+      <td>勇攀高峰因子</td>
+      <td>个股波动率的变动及”勇攀高峰“因子构建——多因子选股系列研究之三</td>
+      <td>https://mp.weixin.qq.com/s/-IxH3n-uR0BwOIbOyzqPrw</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>factor4</td>
+      <td>球队硬币因子</td>
+      <td>个股动量效应的识别及“球队硬币”因子构建——多因子选股系列研究之四</td>
+      <td>https://mp.weixin.qq.com/s/JCv8qziZ_ZfTbBE6l8cKOQ</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>factor5</td>
+      <td>云开雾散因子</td>
+      <td>波动率的波动率与投资者模糊性厌恶——多因子选股系列研究之五</td>
+      <td>https://mp.weixin.qq.com/s/vX4I9SpKRF3_HKQOGhtZcQ</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>factor6</td>
+      <td>飞蛾扑火因子</td>
+      <td>个股股价跳跃及其对振幅因子的改进——多因子选股系列研究之六</td>
+      <td>https://mp.weixin.qq.com/s/V8r1Xbz5J0A9D5J_9GD_IA</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>factor8</td>
+      <td>草木皆兵因子</td>
+      <td>显著效应、极端收益扭曲决策权重和“草木皆兵”因子——多因子选股系列研究之八</td>
+      <td>https://mp.weixin.qq.com/s/hdtzQaCF2h6ZjZd-0HAftQ</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>factor9</td>
+      <td>水中行舟因子</td>
+      <td>个股成交额的市场跟随性与“水中行舟”因子——多因子选股系列研究之九</td>
+      <td>https://mp.weixin.qq.com/s/Zv6XX8ddUvBCtG-4LM1MKQ</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+<section id="第三步读取因子数据" class="level2">
+<h2 class="anchored" data-anchor-id="第三步读取因子数据">第三步：读取因子数据</h2>
+<section id="读取单日单个因子的数据" class="level3">
+<h3 class="anchored" data-anchor-id="读取单日单个因子的数据">①读取单日单个因子的数据</h3>
+<div class="cell" data-execution_count="35">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>fr.read_factor(<span class="st">'球队硬币'</span>,trade_date<span class="op">=</span><span class="dv">20230106</span>) <span class="co"># 读取球队硬币因子在2023年1月13日的因子数据</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>正在读取球队硬币因子的数据</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="35">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th></th>
+      <th>000001.SZ</th>
+      <th>000002.SZ</th>
+      <th>000004.SZ</th>
+      <th>000005.SZ</th>
+      <th>000006.SZ</th>
+      <th>000007.SZ</th>
+      <th>000008.SZ</th>
+      <th>000009.SZ</th>
+      <th>000010.SZ</th>
+      <th>000011.SZ</th>
+      <th>...</th>
+      <th>871970.BJ</th>
+      <th>871981.BJ</th>
+      <th>872374.BJ</th>
+      <th>872808.BJ</th>
+      <th>872925.BJ</th>
+      <th>873122.BJ</th>
+      <th>873169.BJ</th>
+      <th>873223.BJ</th>
+      <th>873339.BJ</th>
+      <th>873527.BJ</th>
+    </tr>
+    <tr>
+      <th>name</th>
+      <th>index</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>球队硬币因子</th>
+      <th>2023-01-06</th>
+      <td>-3.45854</td>
+      <td>-0.674148</td>
+      <td>0.220243</td>
+      <td>-0.950252</td>
+      <td>8.786346</td>
+      <td>0.500339</td>
+      <td>-1.828122</td>
+      <td>0.267091</td>
+      <td>-0.781898</td>
+      <td>2.299623</td>
+      <td>...</td>
+      <td>0.104238</td>
+      <td>-1.345124</td>
+      <td>-1.070172</td>
+      <td>-3.192394</td>
+      <td>-1.628848</td>
+      <td>0.60037</td>
+      <td>-2.126244</td>
+      <td>-0.90467</td>
+      <td>-0.537109</td>
+      <td>-1.108383</td>
+    </tr>
+  </tbody>
+</table>
+<p>1 rows × 5015 columns</p>
+</div>
+</div>
+</div>
+<div class="cell" data-execution_count="36">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>fr.read_factor(<span class="st">'factor4'</span>,trade_date<span class="op">=</span><span class="st">'20230106'</span>) <span class="co"># 读取方正金工多因子系列第4篇的因子在2023年1月13日的因子数据</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>正在读取球队硬币因子的数据</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="36">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th></th>
+      <th>000001.SZ</th>
+      <th>000002.SZ</th>
+      <th>000004.SZ</th>
+      <th>000005.SZ</th>
+      <th>000006.SZ</th>
+      <th>000007.SZ</th>
+      <th>000008.SZ</th>
+      <th>000009.SZ</th>
+      <th>000010.SZ</th>
+      <th>000011.SZ</th>
+      <th>...</th>
+      <th>871970.BJ</th>
+      <th>871981.BJ</th>
+      <th>872374.BJ</th>
+      <th>872808.BJ</th>
+      <th>872925.BJ</th>
+      <th>873122.BJ</th>
+      <th>873169.BJ</th>
+      <th>873223.BJ</th>
+      <th>873339.BJ</th>
+      <th>873527.BJ</th>
+    </tr>
+    <tr>
+      <th>name</th>
+      <th>index</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>球队硬币因子</th>
+      <th>2023-01-06</th>
+      <td>-3.45854</td>
+      <td>-0.674148</td>
+      <td>0.220243</td>
+      <td>-0.950252</td>
+      <td>8.786346</td>
+      <td>0.500339</td>
+      <td>-1.828122</td>
+      <td>0.267091</td>
+      <td>-0.781898</td>
+      <td>2.299623</td>
+      <td>...</td>
+      <td>0.104238</td>
+      <td>-1.345124</td>
+      <td>-1.070172</td>
+      <td>-3.192394</td>
+      <td>-1.628848</td>
+      <td>0.60037</td>
+      <td>-2.126244</td>
+      <td>-0.90467</td>
+      <td>-0.537109</td>
+      <td>-1.108383</td>
+    </tr>
+  </tbody>
+</table>
+<p>1 rows × 5015 columns</p>
+</div>
+</div>
+</div>
+</section>
+<section id="读取多个交易日单个因子的数据" class="level3">
+<h3 class="anchored" data-anchor-id="读取多个交易日单个因子的数据">②读取多个交易日单个因子的数据</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>fr.read_factor(<span class="st">'球队硬币'</span>,start_date<span class="op">=</span><span class="st">'2023-01-01'</span>,end_date<span class="op">=</span>pd.Timestamp(<span class="st">'20230106'</span>)) <span class="co"># 读取球队硬币因子从2023年1月1日至2023年1月13日的因子数据</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>正在读取球队硬币因子的数据</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th></th>
+      <th>000001.SZ</th>
+      <th>000002.SZ</th>
+      <th>000004.SZ</th>
+      <th>000005.SZ</th>
+      <th>000006.SZ</th>
+      <th>000007.SZ</th>
+      <th>000008.SZ</th>
+      <th>000009.SZ</th>
+      <th>000010.SZ</th>
+      <th>000011.SZ</th>
+      <th>...</th>
+      <th>871970.BJ</th>
+      <th>871981.BJ</th>
+      <th>872374.BJ</th>
+      <th>872808.BJ</th>
+      <th>872925.BJ</th>
+      <th>873122.BJ</th>
+      <th>873169.BJ</th>
+      <th>873223.BJ</th>
+      <th>873339.BJ</th>
+      <th>873527.BJ</th>
+    </tr>
+    <tr>
+      <th>name</th>
+      <th>index</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th rowspan="4" valign="top">球队硬币因子</th>
+      <th>2023-01-03</th>
+      <td>-2.358642</td>
+      <td>-1.345033</td>
+      <td>1.162492</td>
+      <td>0.007223</td>
+      <td>8.697314</td>
+      <td>1.189680</td>
+      <td>-1.702174</td>
+      <td>-1.052431</td>
+      <td>-0.854015</td>
+      <td>3.398331</td>
+      <td>...</td>
+      <td>-0.103756</td>
+      <td>-1.137786</td>
+      <td>-1.021316</td>
+      <td>-3.253337</td>
+      <td>-1.775420</td>
+      <td>2.468078</td>
+      <td>-1.900470</td>
+      <td>-1.004885</td>
+      <td>-0.407954</td>
+      <td>-0.799920</td>
+    </tr>
+    <tr>
+      <th>2023-01-04</th>
+      <td>-3.250196</td>
+      <td>-0.612765</td>
+      <td>1.104373</td>
+      <td>-0.604997</td>
+      <td>8.853588</td>
+      <td>0.434524</td>
+      <td>-2.027665</td>
+      <td>-1.078369</td>
+      <td>-1.319052</td>
+      <td>2.476316</td>
+      <td>...</td>
+      <td>-0.088794</td>
+      <td>-1.116035</td>
+      <td>-1.024373</td>
+      <td>-3.126951</td>
+      <td>-1.740175</td>
+      <td>2.741972</td>
+      <td>-2.164878</td>
+      <td>-0.959739</td>
+      <td>-0.397286</td>
+      <td>-0.845371</td>
+    </tr>
+    <tr>
+      <th>2023-01-05</th>
+      <td>-3.612259</td>
+      <td>-0.353330</td>
+      <td>0.683165</td>
+      <td>-0.712644</td>
+      <td>8.803313</td>
+      <td>0.304470</td>
+      <td>-1.978654</td>
+      <td>-0.557577</td>
+      <td>-1.869844</td>
+      <td>2.610491</td>
+      <td>...</td>
+      <td>0.010475</td>
+      <td>-1.115315</td>
+      <td>-1.121056</td>
+      <td>-3.268384</td>
+      <td>-1.753120</td>
+      <td>1.020633</td>
+      <td>-2.132997</td>
+      <td>-0.893447</td>
+      <td>-0.449713</td>
+      <td>-0.817057</td>
+    </tr>
+    <tr>
+      <th>2023-01-06</th>
+      <td>-3.458540</td>
+      <td>-0.674148</td>
+      <td>0.220243</td>
+      <td>-0.950252</td>
+      <td>8.786346</td>
+      <td>0.500339</td>
+      <td>-1.828122</td>
+      <td>0.267091</td>
+      <td>-0.781898</td>
+      <td>2.299623</td>
+      <td>...</td>
+      <td>0.104238</td>
+      <td>-1.345124</td>
+      <td>-1.070172</td>
+      <td>-3.192394</td>
+      <td>-1.628848</td>
+      <td>0.600370</td>
+      <td>-2.126244</td>
+      <td>-0.904670</td>
+      <td>-0.537109</td>
+      <td>-1.108383</td>
+    </tr>
+  </tbody>
+</table>
+<p>4 rows × 5017 columns</p>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>fr.read_factor(<span class="st">'factor4'</span>,start_date<span class="op">=</span><span class="dv">20230101</span>,end_date<span class="op">=</span><span class="dv">20230106</span>,sql_like<span class="op">=</span><span class="va">True</span>) <span class="co"># 以sql的形式，读取方正金工多因子系列第4篇的因子从2023年1月1日至2023年1月13日的因子数据</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>正在读取球队硬币因子的数据</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>date</th>
+      <th>code</th>
+      <th>球队硬币因子</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2023-01-03</td>
+      <td>000001.SZ</td>
+      <td>-2.358642</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2023-01-03</td>
+      <td>000002.SZ</td>
+      <td>-1.345033</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2023-01-03</td>
+      <td>000004.SZ</td>
+      <td>1.162492</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2023-01-03</td>
+      <td>000005.SZ</td>
+      <td>0.007223</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2023-01-03</td>
+      <td>000006.SZ</td>
+      <td>8.697314</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>20045</th>
+      <td>2023-01-06</td>
+      <td>873122.BJ</td>
+      <td>0.600370</td>
+    </tr>
+    <tr>
+      <th>20046</th>
+      <td>2023-01-06</td>
+      <td>873169.BJ</td>
+      <td>-2.126244</td>
+    </tr>
+    <tr>
+      <th>20047</th>
+      <td>2023-01-06</td>
+      <td>873223.BJ</td>
+      <td>-0.904670</td>
+    </tr>
+    <tr>
+      <th>20048</th>
+      <td>2023-01-06</td>
+      <td>873339.BJ</td>
+      <td>-0.537109</td>
+    </tr>
+    <tr>
+      <th>20049</th>
+      <td>2023-01-06</td>
+      <td>873527.BJ</td>
+      <td>-1.108383</td>
+    </tr>
+  </tbody>
+</table>
+<p>20050 rows × 3 columns</p>
+</div>
+</div>
+</div>
+</section>
+<section id="读取多个交易日多个因子的因子数据" class="level3">
+<h3 class="anchored" data-anchor-id="读取多个交易日多个因子的因子数据">③读取多个交易日多个因子的因子数据</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>fr.read_factor([<span class="st">'球队硬币'</span>,<span class="st">'云开雾散'</span>],start_date<span class="op">=</span><span class="st">'20230101'</span>,end_date<span class="op">=</span><span class="st">'20230106'</span>) <span class="co"># 分别读取球队硬币因子和云开雾散因子从2023年1月1日至2023年1月13日的因子数据</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>正在读取球队硬币因子的数据
+正在读取云开雾散因子的数据</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th></th>
+      <th>000001.SZ</th>
+      <th>000002.SZ</th>
+      <th>000004.SZ</th>
+      <th>000005.SZ</th>
+      <th>000006.SZ</th>
+      <th>000007.SZ</th>
+      <th>000008.SZ</th>
+      <th>000009.SZ</th>
+      <th>000010.SZ</th>
+      <th>000011.SZ</th>
+      <th>...</th>
+      <th>301398.SZ</th>
+      <th>600038.SH</th>
+      <th>600459.SH</th>
+      <th>600663.SH</th>
+      <th>600729.SH</th>
+      <th>603029.SH</th>
+      <th>688141.SH</th>
+      <th>688147.SH</th>
+      <th>688172.SH</th>
+      <th>688498.SH</th>
+    </tr>
+    <tr>
+      <th>name</th>
+      <th>index</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th rowspan="4" valign="top">球队硬币因子</th>
+      <th>2023-01-03</th>
+      <td>-2.358642</td>
+      <td>-1.345033</td>
+      <td>1.162492</td>
+      <td>0.007223</td>
+      <td>8.697314</td>
+      <td>1.189680</td>
+      <td>-1.702174</td>
+      <td>-1.052431</td>
+      <td>-0.854015</td>
+      <td>3.398331</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2023-01-04</th>
+      <td>-3.250196</td>
+      <td>-0.612765</td>
+      <td>1.104373</td>
+      <td>-0.604997</td>
+      <td>8.853588</td>
+      <td>0.434524</td>
+      <td>-2.027665</td>
+      <td>-1.078369</td>
+      <td>-1.319052</td>
+      <td>2.476316</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2023-01-05</th>
+      <td>-3.612259</td>
+      <td>-0.353330</td>
+      <td>0.683165</td>
+      <td>-0.712644</td>
+      <td>8.803313</td>
+      <td>0.304470</td>
+      <td>-1.978654</td>
+      <td>-0.557577</td>
+      <td>-1.869844</td>
+      <td>2.610491</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2023-01-06</th>
+      <td>-3.458540</td>
+      <td>-0.674148</td>
+      <td>0.220243</td>
+      <td>-0.950252</td>
+      <td>8.786346</td>
+      <td>0.500339</td>
+      <td>-1.828122</td>
+      <td>0.267091</td>
+      <td>-0.781898</td>
+      <td>2.299623</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th rowspan="4" valign="top">云开雾散因子</th>
+      <th>2023-01-03</th>
+      <td>-0.981326</td>
+      <td>-0.944349</td>
+      <td>-0.997003</td>
+      <td>4.198288</td>
+      <td>3.824620</td>
+      <td>-0.305261</td>
+      <td>-2.440184</td>
+      <td>1.778184</td>
+      <td>-1.547923</td>
+      <td>2.822911</td>
+      <td>...</td>
+      <td>2.320428</td>
+      <td>-0.672918</td>
+      <td>-0.150167</td>
+      <td>1.191432</td>
+      <td>0.075872</td>
+      <td>10.216414</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>1.769576</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2023-01-04</th>
+      <td>-0.874760</td>
+      <td>-0.565374</td>
+      <td>-1.418436</td>
+      <td>-2.256764</td>
+      <td>3.836005</td>
+      <td>-0.601352</td>
+      <td>-1.189656</td>
+      <td>1.456942</td>
+      <td>-1.902164</td>
+      <td>2.427931</td>
+      <td>...</td>
+      <td>2.093086</td>
+      <td>-0.477727</td>
+      <td>-0.157869</td>
+      <td>1.731492</td>
+      <td>-0.314115</td>
+      <td>10.224871</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>1.559961</td>
+      <td>1.156921</td>
+    </tr>
+    <tr>
+      <th>2023-01-05</th>
+      <td>-0.254081</td>
+      <td>-0.614854</td>
+      <td>-1.407234</td>
+      <td>-2.364404</td>
+      <td>3.869275</td>
+      <td>-1.362426</td>
+      <td>-1.225968</td>
+      <td>1.424493</td>
+      <td>-1.910795</td>
+      <td>2.395279</td>
+      <td>...</td>
+      <td>2.492977</td>
+      <td>-0.415604</td>
+      <td>-0.156190</td>
+      <td>1.573648</td>
+      <td>0.032488</td>
+      <td>9.917723</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>1.374394</td>
+      <td>1.120350</td>
+    </tr>
+    <tr>
+      <th>2023-01-06</th>
+      <td>-0.291150</td>
+      <td>-0.524840</td>
+      <td>-1.476704</td>
+      <td>-3.120565</td>
+      <td>3.906959</td>
+      <td>-1.295554</td>
+      <td>-1.253691</td>
+      <td>-0.280816</td>
+      <td>0.352601</td>
+      <td>2.508948</td>
+      <td>...</td>
+      <td>2.564407</td>
+      <td>-0.250353</td>
+      <td>0.183853</td>
+      <td>1.403672</td>
+      <td>-0.088864</td>
+      <td>10.332152</td>
+      <td>-0.121816</td>
+      <td>0.644811</td>
+      <td>1.282682</td>
+      <td>0.950078</td>
+    </tr>
+  </tbody>
+</table>
+<p>8 rows × 5033 columns</p>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>fr.read_factor([<span class="st">'球队硬币'</span>,<span class="st">'云开雾散'</span>],start_date<span class="op">=</span><span class="st">'20230101'</span>,end_date<span class="op">=</span><span class="st">'20230206'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>正在读取球队硬币因子的数据
+您读取的数据过长，正在分段读取，请稍候……</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>100%|██████████| 37/37 [00:28&lt;00:00,  1.28it/s]</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>读取完成，正在拼接，请稍等
+正在读取云开雾散因子的数据
+您读取的数据过长，正在分段读取，请稍候……</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>100%|██████████| 37/37 [00:29&lt;00:00,  1.27it/s]</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>读取完成，正在拼接，请稍等</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th></th>
+      <th>000001.SZ</th>
+      <th>000002.SZ</th>
+      <th>000004.SZ</th>
+      <th>000005.SZ</th>
+      <th>000006.SZ</th>
+      <th>000007.SZ</th>
+      <th>000008.SZ</th>
+      <th>000009.SZ</th>
+      <th>000010.SZ</th>
+      <th>000011.SZ</th>
+      <th>...</th>
+      <th>603029.SH</th>
+      <th>688525.SH</th>
+      <th>831195.BJ</th>
+      <th>838262.BJ</th>
+      <th>872392.BJ</th>
+      <th>000045.SZ</th>
+      <th>002387.SZ</th>
+      <th>000153.SZ</th>
+      <th>600038.SH</th>
+      <th>688506.SH</th>
+    </tr>
+    <tr>
+      <th>name</th>
+      <th>index</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th rowspan="20" valign="top">球队硬币因子</th>
+      <th>2023-01-03</th>
+      <td>-2.358642</td>
+      <td>-1.345033</td>
+      <td>1.162492</td>
+      <td>0.007223</td>
+      <td>8.697314</td>
+      <td>1.189680</td>
+      <td>-1.702174</td>
+      <td>-1.052431</td>
+      <td>-0.854015</td>
+      <td>3.398331</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2023-01-04</th>
+      <td>-3.250196</td>
+      <td>-0.612765</td>
+      <td>1.104373</td>
+      <td>-0.604997</td>
+      <td>8.853588</td>
+      <td>0.434524</td>
+      <td>-2.027665</td>
+      <td>-1.078369</td>
+      <td>-1.319052</td>
+      <td>2.476316</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2023-01-05</th>
+      <td>-3.612259</td>
+      <td>-0.353330</td>
+      <td>0.683165</td>
+      <td>-0.712644</td>
+      <td>8.803313</td>
+      <td>0.304470</td>
+      <td>-1.978654</td>
+      <td>-0.557577</td>
+      <td>-1.869844</td>
+      <td>2.610491</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2023-01-06</th>
+      <td>-3.458540</td>
+      <td>-0.674148</td>
+      <td>0.220243</td>
+      <td>-0.950252</td>
+      <td>8.786346</td>
+      <td>0.500339</td>
+      <td>-1.828122</td>
+      <td>0.267091</td>
+      <td>-0.781898</td>
+      <td>2.299623</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2023-01-09</th>
+      <td>-3.354882</td>
+      <td>-0.170424</td>
+      <td>0.087265</td>
+      <td>-1.711030</td>
+      <td>8.091143</td>
+      <td>0.268643</td>
+      <td>-1.913154</td>
+      <td>-0.324667</td>
+      <td>-1.089943</td>
+      <td>1.179651</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2023-01-10</th>
+      <td>-4.085837</td>
+      <td>-1.136618</td>
+      <td>0.041872</td>
+      <td>-1.484979</td>
+      <td>8.123063</td>
+      <td>0.195857</td>
+      <td>-1.755869</td>
+      <td>-0.714262</td>
+      <td>-1.289059</td>
+      <td>1.667330</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2023-01-11</th>
+      <td>-4.299566</td>
+      <td>-1.225560</td>
+      <td>0.273944</td>
+      <td>-1.030241</td>
+      <td>7.683715</td>
+      <td>0.762255</td>
+      <td>-1.444859</td>
+      <td>-1.031784</td>
+      <td>-1.868811</td>
+      <td>1.372701</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2023-01-12</th>
+      <td>-4.378207</td>
+      <td>-1.189928</td>
+      <td>0.237218</td>
+      <td>-0.655933</td>
+      <td>7.894500</td>
+      <td>0.988860</td>
+      <td>-1.450630</td>
+      <td>-1.049240</td>
+      <td>-1.932018</td>
+      <td>0.904318</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2023-01-13</th>
+      <td>-4.479527</td>
+      <td>-1.476970</td>
+      <td>0.172361</td>
+      <td>-0.525152</td>
+      <td>7.266575</td>
+      <td>1.433193</td>
+      <td>-1.330020</td>
+      <td>-0.899924</td>
+      <td>-2.360796</td>
+      <td>0.807718</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2023-01-16</th>
+      <td>-4.171016</td>
+      <td>-1.219680</td>
+      <td>-1.174946</td>
+      <td>-0.475743</td>
+      <td>6.070169</td>
+      <td>1.243313</td>
+      <td>-1.233022</td>
+      <td>-0.939703</td>
+      <td>-2.208122</td>
+      <td>1.029549</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2023-01-17</th>
+      <td>-4.023675</td>
+      <td>-1.386111</td>
+      <td>-2.004400</td>
+      <td>-0.622768</td>
+      <td>5.288382</td>
+      <td>1.007523</td>
+      <td>-1.466045</td>
+      <td>-0.899911</td>
+      <td>-1.885433</td>
+      <td>-0.014407</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2023-01-18</th>
+      <td>-4.353316</td>
+      <td>-2.071842</td>
+      <td>-2.029811</td>
+      <td>-0.676816</td>
+      <td>5.694441</td>
+      <td>1.046042</td>
+      <td>-1.427424</td>
+      <td>-1.070267</td>
+      <td>-2.242011</td>
+      <td>0.541593</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2023-01-19</th>
+      <td>-3.834700</td>
+      <td>-2.081139</td>
+      <td>-2.126112</td>
+      <td>-0.692192</td>
+      <td>5.532381</td>
+      <td>0.949091</td>
+      <td>-1.522382</td>
+      <td>-1.382040</td>
+      <td>-2.418350</td>
+      <td>0.680613</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2023-01-20</th>
+      <td>-3.529300</td>
+      <td>-2.139061</td>
+      <td>-1.950409</td>
+      <td>-0.787610</td>
+      <td>6.188294</td>
+      <td>-0.064943</td>
+      <td>-1.693119</td>
+      <td>-1.255481</td>
+      <td>-2.089060</td>
+      <td>1.099186</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2023-01-30</th>
+      <td>-3.396520</td>
+      <td>-2.177579</td>
+      <td>-2.041623</td>
+      <td>-1.006709</td>
+      <td>4.699233</td>
+      <td>0.209981</td>
+      <td>-1.844951</td>
+      <td>-1.615751</td>
+      <td>-2.189002</td>
+      <td>0.647098</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2023-01-31</th>
+      <td>-3.307280</td>
+      <td>-2.372615</td>
+      <td>-1.825028</td>
+      <td>-1.052096</td>
+      <td>4.660585</td>
+      <td>-0.146351</td>
+      <td>-1.843303</td>
+      <td>-1.585481</td>
+      <td>-2.769475</td>
+      <td>-0.353974</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2023-02-01</th>
+      <td>-2.712186</td>
+      <td>-2.285143</td>
+      <td>-2.908093</td>
+      <td>-1.144443</td>
+      <td>2.583668</td>
+      <td>-0.328338</td>
+      <td>-1.688609</td>
+      <td>-1.630970</td>
+      <td>-2.642992</td>
+      <td>-0.415580</td>
+      <td>...</td>
+      <td>2.624134</td>
+      <td>9.190541</td>
+      <td>2.243016</td>
+      <td>5.085097</td>
+      <td>2.930902</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2023-02-02</th>
+      <td>-2.475493</td>
+      <td>-2.352708</td>
+      <td>-3.016441</td>
+      <td>-1.441300</td>
+      <td>1.523398</td>
+      <td>-0.080891</td>
+      <td>-1.691300</td>
+      <td>-1.736535</td>
+      <td>-2.545913</td>
+      <td>-0.217612</td>
+      <td>...</td>
+      <td>3.471669</td>
+      <td>8.035542</td>
+      <td>2.034675</td>
+      <td>5.038055</td>
+      <td>2.787796</td>
+      <td>4.466066</td>
+      <td>0.000020</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2023-02-03</th>
+      <td>-2.276289</td>
+      <td>-2.365098</td>
+      <td>-2.835789</td>
+      <td>-1.496792</td>
+      <td>3.269992</td>
+      <td>-0.033889</td>
+      <td>-1.683524</td>
+      <td>-1.863987</td>
+      <td>-2.081520</td>
+      <td>-0.638868</td>
+      <td>...</td>
+      <td>5.042774</td>
+      <td>7.729171</td>
+      <td>1.799429</td>
+      <td>4.820005</td>
+      <td>2.745846</td>
+      <td>4.197322</td>
+      <td>0.103416</td>
+      <td>0.130123</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2023-02-06</th>
+      <td>-2.457774</td>
+      <td>-2.504629</td>
+      <td>-2.637363</td>
+      <td>-1.612015</td>
+      <td>3.456960</td>
+      <td>-0.064467</td>
+      <td>-1.685374</td>
+      <td>-1.756911</td>
+      <td>-2.093174</td>
+      <td>-0.557864</td>
+      <td>...</td>
+      <td>4.689956</td>
+      <td>7.270080</td>
+      <td>2.828328</td>
+      <td>3.404015</td>
+      <td>1.976494</td>
+      <td>4.459459</td>
+      <td>-0.093789</td>
+      <td>-0.010975</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th rowspan="20" valign="top">云开雾散因子</th>
+      <th>2023-01-03</th>
+      <td>-0.981326</td>
+      <td>-0.944349</td>
+      <td>-0.997003</td>
+      <td>4.198288</td>
+      <td>3.824620</td>
+      <td>-0.305261</td>
+      <td>-2.440184</td>
+      <td>1.778184</td>
+      <td>-1.547923</td>
+      <td>2.822911</td>
+      <td>...</td>
+      <td>10.216414</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>-0.119242</td>
+      <td>2.722243</td>
+      <td>-0.672918</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2023-01-04</th>
+      <td>-0.874760</td>
+      <td>-0.565374</td>
+      <td>-1.418436</td>
+      <td>-2.256764</td>
+      <td>3.836005</td>
+      <td>-0.601352</td>
+      <td>-1.189656</td>
+      <td>1.456942</td>
+      <td>-1.902164</td>
+      <td>2.427931</td>
+      <td>...</td>
+      <td>10.224871</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>-0.176335</td>
+      <td>NaN</td>
+      <td>-0.477727</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2023-01-05</th>
+      <td>-0.254081</td>
+      <td>-0.614854</td>
+      <td>-1.407234</td>
+      <td>-2.364404</td>
+      <td>3.869275</td>
+      <td>-1.362426</td>
+      <td>-1.225968</td>
+      <td>1.424493</td>
+      <td>-1.910795</td>
+      <td>2.395279</td>
+      <td>...</td>
+      <td>9.917723</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>1.390256</td>
+      <td>NaN</td>
+      <td>-0.415604</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2023-01-06</th>
+      <td>-0.291150</td>
+      <td>-0.524840</td>
+      <td>-1.476704</td>
+      <td>-3.120565</td>
+      <td>3.906959</td>
+      <td>-1.295554</td>
+      <td>-1.253691</td>
+      <td>-0.280816</td>
+      <td>0.352601</td>
+      <td>2.508948</td>
+      <td>...</td>
+      <td>10.332152</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>1.369488</td>
+      <td>NaN</td>
+      <td>-0.250353</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2023-01-09</th>
+      <td>-0.311834</td>
+      <td>-0.652490</td>
+      <td>-1.435259</td>
+      <td>-3.156991</td>
+      <td>3.906213</td>
+      <td>-1.317670</td>
+      <td>-1.064004</td>
+      <td>-0.284044</td>
+      <td>0.241210</td>
+      <td>2.511567</td>
+      <td>...</td>
+      <td>10.451378</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>1.790611</td>
+      <td>NaN</td>
+      <td>-0.129676</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2023-01-10</th>
+      <td>-0.252993</td>
+      <td>-0.673770</td>
+      <td>-1.452988</td>
+      <td>-3.094026</td>
+      <td>4.145813</td>
+      <td>-1.365568</td>
+      <td>-0.990502</td>
+      <td>0.061734</td>
+      <td>-0.068599</td>
+      <td>2.412575</td>
+      <td>...</td>
+      <td>9.994998</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>1.753357</td>
+      <td>NaN</td>
+      <td>1.476060</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2023-01-11</th>
+      <td>-0.108614</td>
+      <td>-0.409360</td>
+      <td>-1.538049</td>
+      <td>-3.050843</td>
+      <td>4.022810</td>
+      <td>-1.322641</td>
+      <td>-0.947558</td>
+      <td>-0.022587</td>
+      <td>-0.226062</td>
+      <td>1.874980</td>
+      <td>...</td>
+      <td>9.835279</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>2.050787</td>
+      <td>NaN</td>
+      <td>1.580048</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2023-01-12</th>
+      <td>-0.019939</td>
+      <td>-0.348093</td>
+      <td>-1.517629</td>
+      <td>-3.235680</td>
+      <td>4.079903</td>
+      <td>-1.376875</td>
+      <td>-0.880969</td>
+      <td>0.259599</td>
+      <td>-0.196476</td>
+      <td>1.914316</td>
+      <td>...</td>
+      <td>9.753503</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>3.056719</td>
+      <td>NaN</td>
+      <td>1.593361</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2023-01-13</th>
+      <td>0.004401</td>
+      <td>-0.231196</td>
+      <td>-1.393393</td>
+      <td>-3.245165</td>
+      <td>3.799570</td>
+      <td>-1.262185</td>
+      <td>-0.851256</td>
+      <td>-0.057122</td>
+      <td>-0.185930</td>
+      <td>2.013694</td>
+      <td>...</td>
+      <td>10.744896</td>
+      <td>2.872292</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>3.320740</td>
+      <td>NaN</td>
+      <td>1.514023</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2023-01-16</th>
+      <td>-0.095033</td>
+      <td>-0.481757</td>
+      <td>-1.352985</td>
+      <td>-3.607232</td>
+      <td>3.402758</td>
+      <td>-1.354385</td>
+      <td>-0.873112</td>
+      <td>-0.010235</td>
+      <td>-0.363502</td>
+      <td>1.528507</td>
+      <td>...</td>
+      <td>10.615026</td>
+      <td>2.599090</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>3.364177</td>
+      <td>NaN</td>
+      <td>0.875702</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2023-01-17</th>
+      <td>0.024778</td>
+      <td>-0.312762</td>
+      <td>-1.256656</td>
+      <td>-3.683347</td>
+      <td>3.316168</td>
+      <td>-0.715599</td>
+      <td>-0.884222</td>
+      <td>-0.092405</td>
+      <td>-0.360934</td>
+      <td>0.865153</td>
+      <td>...</td>
+      <td>9.666980</td>
+      <td>3.535676</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>1.102298</td>
+      <td>2.930146</td>
+      <td>NaN</td>
+      <td>0.968285</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2023-01-18</th>
+      <td>-0.026242</td>
+      <td>-0.403705</td>
+      <td>-0.844195</td>
+      <td>-4.013815</td>
+      <td>3.142178</td>
+      <td>-0.796957</td>
+      <td>-0.984815</td>
+      <td>-0.125247</td>
+      <td>-0.493555</td>
+      <td>0.820175</td>
+      <td>...</td>
+      <td>9.768873</td>
+      <td>14.707472</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>0.964833</td>
+      <td>2.595237</td>
+      <td>-0.017674</td>
+      <td>0.924300</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2023-01-19</th>
+      <td>-0.089630</td>
+      <td>-0.456148</td>
+      <td>-0.838379</td>
+      <td>-4.044224</td>
+      <td>3.142638</td>
+      <td>-0.736692</td>
+      <td>-1.018868</td>
+      <td>-0.156723</td>
+      <td>-0.563879</td>
+      <td>1.005141</td>
+      <td>...</td>
+      <td>9.555741</td>
+      <td>13.743744</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>2.542283</td>
+      <td>2.252805</td>
+      <td>-0.177023</td>
+      <td>0.931085</td>
+      <td>1.175814</td>
+    </tr>
+    <tr>
+      <th>2023-01-20</th>
+      <td>-0.122600</td>
+      <td>-0.368921</td>
+      <td>-0.858872</td>
+      <td>-4.358661</td>
+      <td>2.865788</td>
+      <td>-0.362223</td>
+      <td>-1.177539</td>
+      <td>-0.086074</td>
+      <td>-0.468621</td>
+      <td>1.080388</td>
+      <td>...</td>
+      <td>4.278222</td>
+      <td>13.298083</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>2.291371</td>
+      <td>1.989806</td>
+      <td>-0.395701</td>
+      <td>1.111020</td>
+      <td>0.954491</td>
+    </tr>
+    <tr>
+      <th>2023-01-30</th>
+      <td>-0.161589</td>
+      <td>-0.119212</td>
+      <td>-0.485579</td>
+      <td>-4.350704</td>
+      <td>2.349619</td>
+      <td>-0.752434</td>
+      <td>-1.263825</td>
+      <td>0.264184</td>
+      <td>-0.125579</td>
+      <td>0.428520</td>
+      <td>...</td>
+      <td>3.914207</td>
+      <td>12.830232</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>2.034340</td>
+      <td>1.744189</td>
+      <td>-0.580326</td>
+      <td>1.174657</td>
+      <td>0.980863</td>
+    </tr>
+    <tr>
+      <th>2023-01-31</th>
+      <td>-0.249149</td>
+      <td>-0.111299</td>
+      <td>0.580837</td>
+      <td>-4.311461</td>
+      <td>2.125479</td>
+      <td>-0.522978</td>
+      <td>-1.269708</td>
+      <td>0.149615</td>
+      <td>-0.414614</td>
+      <td>0.261126</td>
+      <td>...</td>
+      <td>3.783427</td>
+      <td>12.366186</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>4.748344</td>
+      <td>1.502847</td>
+      <td>-0.460303</td>
+      <td>0.904349</td>
+      <td>1.675340</td>
+    </tr>
+    <tr>
+      <th>2023-02-01</th>
+      <td>-0.244308</td>
+      <td>-0.094077</td>
+      <td>0.989772</td>
+      <td>-4.181594</td>
+      <td>1.518413</td>
+      <td>0.031954</td>
+      <td>-1.081082</td>
+      <td>-0.362750</td>
+      <td>-0.399329</td>
+      <td>-0.516374</td>
+      <td>...</td>
+      <td>3.643406</td>
+      <td>11.642035</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>4.397930</td>
+      <td>1.416109</td>
+      <td>-0.632037</td>
+      <td>0.675453</td>
+      <td>1.989817</td>
+    </tr>
+    <tr>
+      <th>2023-02-02</th>
+      <td>-0.149381</td>
+      <td>-0.069716</td>
+      <td>0.750863</td>
+      <td>-4.240031</td>
+      <td>1.322263</td>
+      <td>0.358174</td>
+      <td>-1.178853</td>
+      <td>-0.400854</td>
+      <td>-0.460727</td>
+      <td>-1.164629</td>
+      <td>...</td>
+      <td>4.035154</td>
+      <td>11.790204</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>4.403098</td>
+      <td>1.457429</td>
+      <td>-0.582638</td>
+      <td>0.422889</td>
+      <td>2.240189</td>
+    </tr>
+    <tr>
+      <th>2023-02-03</th>
+      <td>-0.324321</td>
+      <td>-0.017821</td>
+      <td>0.742932</td>
+      <td>-4.099188</td>
+      <td>1.124398</td>
+      <td>0.400221</td>
+      <td>-1.095826</td>
+      <td>-0.374888</td>
+      <td>-0.115109</td>
+      <td>-1.262224</td>
+      <td>...</td>
+      <td>4.065579</td>
+      <td>11.408996</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>4.189308</td>
+      <td>1.342988</td>
+      <td>-0.645231</td>
+      <td>0.394539</td>
+      <td>2.069732</td>
+    </tr>
+    <tr>
+      <th>2023-02-06</th>
+      <td>-0.267734</td>
+      <td>0.007991</td>
+      <td>0.769199</td>
+      <td>-4.068778</td>
+      <td>0.035837</td>
+      <td>0.471708</td>
+      <td>-1.089275</td>
+      <td>-0.295580</td>
+      <td>-0.071036</td>
+      <td>-1.311063</td>
+      <td>...</td>
+      <td>4.203574</td>
+      <td>10.955787</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>4.184727</td>
+      <td>1.200537</td>
+      <td>-0.776995</td>
+      <td>0.282424</td>
+      <td>1.927306</td>
+    </tr>
+  </tbody>
+</table>
+<p>40 rows × 5068 columns</p>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>fr.read_factor([<span class="st">'球队硬币'</span>,<span class="st">'云开雾散'</span>],trade_date<span class="op">=</span><span class="dv">20230106</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>正在读取球队硬币因子的数据
+正在读取云开雾散因子的数据</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th></th>
+      <th>000001.SZ</th>
+      <th>000002.SZ</th>
+      <th>000004.SZ</th>
+      <th>000005.SZ</th>
+      <th>000006.SZ</th>
+      <th>000007.SZ</th>
+      <th>000008.SZ</th>
+      <th>000009.SZ</th>
+      <th>000010.SZ</th>
+      <th>000011.SZ</th>
+      <th>...</th>
+      <th>301398.SZ</th>
+      <th>600038.SH</th>
+      <th>600459.SH</th>
+      <th>600663.SH</th>
+      <th>600729.SH</th>
+      <th>603029.SH</th>
+      <th>688141.SH</th>
+      <th>688147.SH</th>
+      <th>688172.SH</th>
+      <th>688498.SH</th>
+    </tr>
+    <tr>
+      <th>name</th>
+      <th>index</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>球队硬币因子</th>
+      <th>2023-01-06</th>
+      <td>-3.45854</td>
+      <td>-0.674148</td>
+      <td>0.220243</td>
+      <td>-0.950252</td>
+      <td>8.786346</td>
+      <td>0.500339</td>
+      <td>-1.828122</td>
+      <td>0.267091</td>
+      <td>-0.781898</td>
+      <td>2.299623</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>云开雾散因子</th>
+      <th>2023-01-06</th>
+      <td>-0.29115</td>
+      <td>-0.524840</td>
+      <td>-1.476704</td>
+      <td>-3.120565</td>
+      <td>3.906959</td>
+      <td>-1.295554</td>
+      <td>-1.253691</td>
+      <td>-0.280816</td>
+      <td>0.352601</td>
+      <td>2.508948</td>
+      <td>...</td>
+      <td>2.564407</td>
+      <td>-0.250353</td>
+      <td>0.183853</td>
+      <td>1.403672</td>
+      <td>-0.088864</td>
+      <td>10.332152</td>
+      <td>-0.121816</td>
+      <td>0.644811</td>
+      <td>1.282682</td>
+      <td>0.950078</td>
+    </tr>
+  </tbody>
+</table>
+<p>2 rows × 5032 columns</p>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>fr.read_factor([<span class="st">'球队硬币'</span>,<span class="st">'云开雾散'</span>,<span class="st">'飞蛾扑火'</span>],start_date<span class="op">=</span>pd.Timestamp(<span class="st">'20230101'</span>),end_date<span class="op">=</span><span class="dv">20230106</span>,sql_like<span class="op">=</span><span class="va">True</span>) <span class="co"># 以sql的形式，分别读取球队硬币因子、云开雾散因子、飞蛾扑火因子从2023年1月1日至2023年1月13日的因子数据</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>正在读取球队硬币因子的数据
+正在读取云开雾散因子的数据
+正在读取飞蛾扑火因子的数据</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>date</th>
+      <th>code</th>
+      <th>球队硬币因子</th>
+      <th>云开雾散因子</th>
+      <th>飞蛾扑火因子</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2023-01-03</td>
+      <td>000001.SZ</td>
+      <td>-2.358642</td>
+      <td>-0.981326</td>
+      <td>-1.211546</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2023-01-03</td>
+      <td>000002.SZ</td>
+      <td>-1.345033</td>
+      <td>-0.944349</td>
+      <td>-0.747704</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2023-01-03</td>
+      <td>000004.SZ</td>
+      <td>1.162492</td>
+      <td>-0.997003</td>
+      <td>-1.218871</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2023-01-03</td>
+      <td>000005.SZ</td>
+      <td>0.007223</td>
+      <td>4.198288</td>
+      <td>-0.089553</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2023-01-03</td>
+      <td>000006.SZ</td>
+      <td>8.697314</td>
+      <td>3.824620</td>
+      <td>6.631622</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>20114</th>
+      <td>2023-01-06</td>
+      <td>688498.SH</td>
+      <td>NaN</td>
+      <td>0.950078</td>
+      <td>5.589459</td>
+    </tr>
+    <tr>
+      <th>20115</th>
+      <td>2023-01-04</td>
+      <td>000153.SZ</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>3.513004</td>
+    </tr>
+    <tr>
+      <th>20116</th>
+      <td>2023-01-05</td>
+      <td>000153.SZ</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>4.299205</td>
+    </tr>
+    <tr>
+      <th>20117</th>
+      <td>2023-01-06</td>
+      <td>000153.SZ</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>2.936270</td>
+    </tr>
+    <tr>
+      <th>20118</th>
+      <td>2023-01-06</td>
+      <td>601136.SH</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>4.224534</td>
+    </tr>
+  </tbody>
+</table>
+<p>20119 rows × 5 columns</p>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>fr.read_factor([<span class="st">'球队硬币'</span>,<span class="st">'云开雾散'</span>,<span class="st">'飞蛾扑火'</span>],trade_date<span class="op">=</span><span class="dv">20230106</span>,sql_like<span class="op">=</span><span class="va">True</span>) <span class="co"># 以sql的形式，分别读取球队硬币因子、云开雾散因子、飞蛾扑火因子2023年1月13日的因子数据</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>正在读取球队硬币因子的数据
+正在读取云开雾散因子的数据
+正在读取飞蛾扑火因子的数据</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>date</th>
+      <th>code</th>
+      <th>球队硬币因子</th>
+      <th>云开雾散因子</th>
+      <th>飞蛾扑火因子</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2023-01-06</td>
+      <td>000001.SZ</td>
+      <td>-3.458540</td>
+      <td>-0.291150</td>
+      <td>-0.952147</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2023-01-06</td>
+      <td>000002.SZ</td>
+      <td>-0.674148</td>
+      <td>-0.524840</td>
+      <td>-0.743429</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2023-01-06</td>
+      <td>000004.SZ</td>
+      <td>0.220243</td>
+      <td>-1.476704</td>
+      <td>-1.224969</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2023-01-06</td>
+      <td>000005.SZ</td>
+      <td>-0.950252</td>
+      <td>-3.120565</td>
+      <td>-0.757643</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2023-01-06</td>
+      <td>000006.SZ</td>
+      <td>8.786346</td>
+      <td>3.906959</td>
+      <td>6.767050</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>5029</th>
+      <td>2023-01-06</td>
+      <td>688147.SH</td>
+      <td>NaN</td>
+      <td>0.644811</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>5030</th>
+      <td>2023-01-06</td>
+      <td>688172.SH</td>
+      <td>NaN</td>
+      <td>1.282682</td>
+      <td>0.124283</td>
+    </tr>
+    <tr>
+      <th>5031</th>
+      <td>2023-01-06</td>
+      <td>688498.SH</td>
+      <td>NaN</td>
+      <td>0.950078</td>
+      <td>5.589459</td>
+    </tr>
+    <tr>
+      <th>5032</th>
+      <td>2023-01-06</td>
+      <td>000153.SZ</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>2.936270</td>
+    </tr>
+    <tr>
+      <th>5033</th>
+      <td>2023-01-06</td>
+      <td>601136.SH</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>4.224534</td>
+    </tr>
+  </tbody>
+</table>
+<p>5034 rows × 5 columns</p>
+</div>
+</div>
+</div>
+
+
+</section>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
